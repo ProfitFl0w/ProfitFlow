@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    container_name: profitflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: profitflow
+      POSTGRES_USER: profitflow
+      POSTGRES_PASSWORD: profitflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - profitflow-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U profitflow -d profitflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  profitflow-data:
