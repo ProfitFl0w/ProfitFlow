@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/profitflow
-    username: profitflow
-    password: ${DB_PASSWORD:profitflow}
+    url: ${DB_URL:jdbc:postgresql://ep-small-dream-aips9ir0-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require}
+    username: ${DB_USERNAME:neondb_owner}
+    password: ${DB_PASSWORD:npg_HlEm1Rjd8USK}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -27,7 +27,7 @@ app:
       expiration-ms: 86400000
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 logging:
   level:
