@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,7 +20,12 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "integrations")
+@Table(
+        name = "integrations",
+        indexes = {
+                @Index(name = "idx_integrations_merchant_id", columnList = "merchant_id")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor

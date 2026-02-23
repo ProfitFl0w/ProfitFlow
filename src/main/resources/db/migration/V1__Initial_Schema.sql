@@ -34,6 +34,8 @@ CREATE TABLE merchants
 CREATE TABLE order_item_adjustments
 (
     id            UUID       NOT NULL,
+    is_deleted    BOOLEAN    NOT NULL,
+    deleted_at    TIMESTAMP WITHOUT TIME ZONE,
     created_at    TIMESTAMP WITHOUT TIME ZONE,
     updated_at    TIMESTAMP WITHOUT TIME ZONE,
     created_by    VARCHAR(255),
@@ -83,8 +85,9 @@ CREATE TABLE orders
     integration_id UUID         NOT NULL,
     external_id    VARCHAR(255) NOT NULL,
     order_date     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    status         VARCHAR(255) NOT NULL,
+    status         VARCHAR(50)  NOT NULL,
     raw_data       JSONB,
+    CONSTRAINT chk_orders_status CHECK (status IN ('CREATED', 'IN_TRANSIT', 'DELIVERED', 'RETURNED', 'CANCELLED')),
     CONSTRAINT pk_orders PRIMARY KEY (id)
 );
 
@@ -108,6 +111,10 @@ CREATE TABLE products
 CREATE TABLE sync_jobs
 (
     id             UUID     NOT NULL,
+    created_at     TIMESTAMP WITHOUT TIME ZONE,
+    updated_at     TIMESTAMP WITHOUT TIME ZONE,
+    created_by     VARCHAR(255),
+    updated_by     VARCHAR(255),
     integration_id UUID     NOT NULL,
     status         SMALLINT NOT NULL,
     started_at     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -117,10 +124,10 @@ CREATE TABLE sync_jobs
 );
 
 ALTER TABLE orders
-    ADD CONSTRAINT uc_0c5c0daa82c34a12abff83fd8 UNIQUE (integration_id, external_id);
+    ADD CONSTRAINT uc_orders_integration_id_external_id UNIQUE (integration_id, external_id);
 
 ALTER TABLE products
-    ADD CONSTRAINT uc_dbb08060dd57e655a44c88151 UNIQUE (merchant_id, sku);
+    ADD CONSTRAINT uc_products_merchant_id_sku UNIQUE (merchant_id, sku);
 
 ALTER TABLE merchants
     ADD CONSTRAINT uc_merchants_email UNIQUE (email);
@@ -145,3 +152,12 @@ ALTER TABLE products
 
 ALTER TABLE sync_jobs
     ADD CONSTRAINT FK_SYNC_JOBS_ON_INTEGRATION FOREIGN KEY (integration_id) REFERENCES integrations (id);
+
+CREATE INDEX idx_orders_integration_id ON orders (integration_id);
+CREATE INDEX idx_orders_order_date ON orders (order_date);
+CREATE INDEX idx_order_items_order_id ON order_items (order_id);
+CREATE INDEX idx_order_items_product_id ON order_items (product_id);
+CREATE INDEX idx_integrations_merchant_id ON integrations (merchant_id);
+CREATE INDEX idx_products_merchant_id ON products (merchant_id);
+CREATE INDEX idx_sync_jobs_integration_id ON sync_jobs (integration_id);
+CREATE INDEX idx_order_item_adjustments_order_item_id ON order_item_adjustments (order_item_id);

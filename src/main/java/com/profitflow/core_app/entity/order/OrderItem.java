@@ -1,13 +1,14 @@
 package com.profitflow.core_app.entity.order;
 
-import com.profitflow.core_app.entity.basic.SoftDeletableEntity;
 import com.profitflow.core_app.entity.basic.Money;
+import com.profitflow.core_app.entity.basic.SoftDeletableEntity;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -18,7 +19,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "order_items")
+@Table(
+        name = "order_items",
+        indexes = {
+                @Index(name = "idx_order_items_order_id", columnList = "order_id"),
+                @Index(name = "idx_order_items_product_id", columnList = "product_id")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor

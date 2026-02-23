@@ -1,13 +1,14 @@
 package com.profitflow.core_app.entity.order;
 
-import com.profitflow.core_app.entity.basic.AuditableEntity;
 import com.profitflow.core_app.entity.basic.Money;
+import com.profitflow.core_app.entity.basic.SoftDeletableEntity;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,13 +21,18 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Entity
-@Table(name = "order_item_adjustments")
+@Table(
+        name = "order_item_adjustments",
+        indexes = {
+                @Index(name = "idx_order_item_adjustments_order_item_id", columnList = "order_item_id")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItemAdjustment extends AuditableEntity {
+public class OrderItemAdjustment extends SoftDeletableEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
