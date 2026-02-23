@@ -34,10 +34,10 @@ public class Order extends SoftDeletableEntity {
     private Integration integration;
 
     @Column(name = "external_id", nullable = false)
-    private String externalId; // че это такое
+    private String externalId;
 
     @Column(name = "order_date", nullable = false)
-    private OffsetDateTime orderDate; //
+    private OffsetDateTime orderDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
