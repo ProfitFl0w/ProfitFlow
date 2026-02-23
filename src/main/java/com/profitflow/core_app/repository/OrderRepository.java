@@ -1,6 +1,6 @@
 package com.profitflow.core_app.repository;
 
-import com.profitflow.core_app.entity.Order;
+import com.profitflow.core_app.entity.order.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

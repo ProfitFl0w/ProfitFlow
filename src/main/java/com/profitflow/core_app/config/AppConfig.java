@@ -4,6 +4,7 @@ import com.profitflow.core_app.repository.MerchantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,6 +18,10 @@ public class AppConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> merchantRepository.findByEmail(username)
+                                             .map(merchant -> User.withUsername(merchant.getEmail())
+                                                                  .password(merchant.getPassword())
+                                                                  .authorities("ROLE_USER")
+                                                                  .build())
                                              .orElseThrow(() -> new UsernameNotFoundException("Merchant not found"));
     }
 

@@ -1,4 +1,4 @@
-package com.profitflow.core_app.entity;
+package com.profitflow.core_app.entity.integration;
 
 public enum Platform {
     KASPI,
