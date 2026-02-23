@@ -4,6 +4,8 @@ import com.profitflow.core_app.entity.basic.AuditableEntity;
 import com.profitflow.core_app.entity.integration.Integration;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -12,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,7 +40,9 @@ public class SyncJob extends AuditableEntity {
     @JoinColumn(name = "integration_id", nullable = false)
     private Integration integration;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
+    @Default
     private SyncJobStatus status = SyncJobStatus.IN_PROGRESS;
 
     @Column(name = "started_at", nullable = false, updatable = false)

@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 @Embeddable
 public class Money {
@@ -28,8 +29,17 @@ public class Money {
         if (currency == null || currency.isBlank()) {
             throw new AppException(ErrorCode.INVALID_CURRENCY_CODE);
         }
+
+        String normalizedCurrency = currency.trim().toUpperCase(Locale.ROOT);
+        try {
+            // validate and resolve minor units eagerly
+            CurrencyUtils.getMinorUnits(normalizedCurrency);
+        } catch (IllegalArgumentException ex) {
+            throw new AppException(ErrorCode.INVALID_CURRENCY_CODE);
+        }
+
         this.amount = amount;
-        this.currency = currency;
+        this.currency = normalizedCurrency;
     }
 
     public Long getAmount() {

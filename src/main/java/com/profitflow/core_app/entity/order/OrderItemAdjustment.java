@@ -7,6 +7,8 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -17,8 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
 
 @Entity
 @Table(
@@ -37,6 +37,7 @@ public class OrderItemAdjustment extends SoftDeletableEntity {
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private OrderItemAdjustmentType type;
 
@@ -49,8 +50,5 @@ public class OrderItemAdjustment extends SoftDeletableEntity {
 
     @Column(name = "reason")
     private String reason;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
 }
 
