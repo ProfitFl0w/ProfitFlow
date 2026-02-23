@@ -5,7 +5,7 @@ import com.profitflow.core_app.dto.auth.LoginRequest;
 import com.profitflow.core_app.dto.auth.RegisterRequest;
 import com.profitflow.core_app.entity.Merchant;
 import com.profitflow.core_app.exception.AppException;
-import com.profitflow.core_app.exception.ErrorCodes;
+import com.profitflow.core_app.exception.ErrorCode;
 import com.profitflow.core_app.repository.MerchantRepository;
 import com.profitflow.core_app.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -24,18 +24,18 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (merchantRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCodes.MERCHANT_ALREADY_EXISTS);
+            throw new AppException(ErrorCode.MERCHANT_ALREADY_EXISTS);
         }
 
-        var merchant = Merchant.builder()
-                               .companyName(request.getCompanyName())
-                               .email(request.getEmail())
-                               .password(passwordEncoder.encode(request.getPassword())) // Обязательно хешируем пароль!
-                               .build();
+        Merchant merchant = Merchant.builder()
+                                    .companyName(request.getCompanyName())
+                                    .email(request.getEmail())
+                                    .password(passwordEncoder.encode(request.getPassword()))
+                                    .build();
 
         merchantRepository.save(merchant);
 
-        var jwtToken = jwtService.generateToken(merchant);
+        String jwtToken = jwtService.generateToken(merchant.getEmail());
 
         return AuthResponse.builder()
                            .token(jwtToken)
@@ -51,13 +51,13 @@ public class AuthService {
                     )
             );
         } catch (Exception e) {
-            throw new AppException(ErrorCodes.INVALID_CREDENTIALS);
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        var merchant = merchantRepository.findByEmail(request.getEmail())
-                                         .orElseThrow(() -> new AppException(ErrorCodes.MERCHANT_NOT_FOUND));
+        Merchant merchant = merchantRepository.findByEmail(request.getEmail())
+                                              .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
 
-        var jwtToken = jwtService.generateToken(merchant);
+        String jwtToken = jwtService.generateToken(merchant.getEmail());
 
         return AuthResponse.builder()
                            .token(jwtToken)
