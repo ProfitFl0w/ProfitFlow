@@ -19,7 +19,7 @@ import lombok.Setter;
 @Builder
 public class Merchant extends SoftDeletableEntity {
     @Column(name = "company_name", nullable = false)
-    private String companyName; // можно их как то там на ТОО, ОП классифицировать а не просто стринг,может сделать типо ENUM + name?
+    private String companyName;
 
     @Column(nullable = false, unique = true)
     private String email;
