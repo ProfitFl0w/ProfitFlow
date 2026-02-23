@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
 
-    //лишнийоваловыщшпарпщшцрпшщуп
+    //gwuejgijweghipoweg
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
