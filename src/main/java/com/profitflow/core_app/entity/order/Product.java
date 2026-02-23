@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "products", uniqueConstraints = {@UniqueConstraint(columnNames = {"merchant_id", "sku"})}) //а зачем так делать, нельзя разве саму колонку unique = true делать?
+@Table(name = "products", uniqueConstraints = {@UniqueConstraint(columnNames = {"merchant_id", "sku"})})
 @Getter
 @Setter
 @NoArgsConstructor
