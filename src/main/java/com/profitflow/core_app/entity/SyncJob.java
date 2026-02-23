@@ -24,8 +24,7 @@ import java.time.ZoneOffset;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SyncJob extends BaseEntity { // Это типо статус...ээээ...транзакцй между тем как селлер выдает товар и он
-    // едет в склад или после того как он со склада выезжает?
+public class SyncJob extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "integration_id", nullable = false)
     private Integration integration;
