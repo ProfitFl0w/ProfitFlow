@@ -30,7 +30,7 @@ public class AuthService {
         Merchant merchant = Merchant.builder()
                                     .companyName(request.getCompanyName())
                                     .email(request.getEmail())
-                                    .password(passwordEncoder.encode(request.getPassword())) // Обязательно хешируем пароль!
+                                    .password(passwordEncoder.encode(request.getPassword()))
                                     .build();
 
         merchantRepository.save(merchant);
