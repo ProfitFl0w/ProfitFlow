@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @RestController
@@ -21,7 +22,7 @@ public class JobsController {
                 SyncJobStatus.IN_PROGRESS,
                 45,
                 "Collecting orders from OZON (stub)",
-                OffsetDateTime.now().minusSeconds(20),
+                OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(20),
                 null
         ));
     }

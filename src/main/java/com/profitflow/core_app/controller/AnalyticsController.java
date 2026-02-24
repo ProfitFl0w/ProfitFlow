@@ -28,8 +28,9 @@ public class AnalyticsController {
     public ResponseEntity<OrdersAnalyticsResponse> orders(
             @RequestParam(defaultValue = "7") int days
     ) {
+        int clampedDays = Math.max(1, days);
         return ResponseEntity.ok(new OrdersAnalyticsResponse(
-                days,
+                clampedDays,
                 List.of(
                         new OrdersPoint("2026-02-20", 18, new BigDecimal("181000.00")),
                         new OrdersPoint("2026-02-21", 25, new BigDecimal("263500.00")),

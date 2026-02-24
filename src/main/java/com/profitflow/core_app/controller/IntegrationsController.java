@@ -1,6 +1,7 @@
 package com.profitflow.core_app.controller;
 
 import com.profitflow.core_app.entity.integration.Platform;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,7 +44,7 @@ public class IntegrationsController {
     }
 
     @PostMapping
-    public ResponseEntity<IntegrationStub> createIntegration(@RequestBody CreateIntegrationRequest request) {
+    public ResponseEntity<IntegrationStub> createIntegration(@RequestBody @Valid CreateIntegrationRequest request) {
         IntegrationStub response = new IntegrationStub(
                 UUID.randomUUID(),
                 request.platform(),
