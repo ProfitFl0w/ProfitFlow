@@ -25,6 +25,10 @@ app:
     jwt:
       secret: ${JWT_SECRET:my-super-secret-key-that-is-at-least-256-bits-long-for-hs256}
       expiration-ms: 86400000
+    # ENCRYPTION_KEY must be exactly 32 bytes. Set as environment variable in production.
+    # encryption-key is read directly via System.getenv("ENCRYPTION_KEY") in EncryptedStringConverter.
+  cors:
+    allowed-origin: ${FRONTEND_URL:http://localhost:3000}
 
 server:
   port: ${SERVER_PORT:8080}

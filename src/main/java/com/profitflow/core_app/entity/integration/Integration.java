@@ -2,7 +2,9 @@ package com.profitflow.core_app.entity.integration;
 
 import com.profitflow.core_app.entity.Merchant;
 import com.profitflow.core_app.entity.basic.SoftDeletableEntity;
+import com.profitflow.core_app.security.EncryptedStringConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class Integration extends SoftDeletableEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "merchant_id", nullable = false)
     private Merchant merchant;
@@ -40,11 +43,12 @@ public class Integration extends SoftDeletableEntity {
     @Column(nullable = false)
     private Platform platform;
 
+    @Convert(converter = EncryptedStringConverter.class)
     @Column(name = "api_key", nullable = false)
     private String apiKey;
 
     @Column(name = "shop_name", nullable = false)
-    private String shopName; 
+    private String shopName;
 
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
