@@ -6,7 +6,6 @@ import com.profitflow.core_app.common.util.CurrencyUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Builder;
-
 import java.math.BigDecimal;
 import java.util.Locale;
 
@@ -66,5 +65,14 @@ public class Money {
         int scale = CurrencyUtils.getMinorUnits(this.currency);
         return BigDecimal.valueOf(this.amount, scale);
     }
-}
 
+    public static Money of(BigDecimal decimalAmount, String currency) {
+        if (decimalAmount == null) {
+            throw new AppException(ErrorCode.INVALID_MONEY_AMOUNT);
+        }
+        String normalizedCurrency = currency.trim().toUpperCase(Locale.ROOT);
+        int scale = CurrencyUtils.getMinorUnits(normalizedCurrency);
+        long minorUnits = decimalAmount.scaleByPowerOfTen(scale).longValueExact();
+        return new Money(minorUnits, normalizedCurrency);
+    }
+}

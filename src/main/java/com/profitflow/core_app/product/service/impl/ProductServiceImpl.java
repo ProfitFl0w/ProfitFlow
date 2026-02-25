@@ -21,7 +21,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
-
     private final ProductRepository productRepository;
     private final MerchantRepository merchantRepository;
 
@@ -43,10 +42,7 @@ public class ProductServiceImpl implements ProductService {
                 .filter(p -> p.getMerchant().getId().equals(merchant.getId()))
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        Money newCostPrice = Money.builder()
-                .amount(costPriceAmount)
-                .currency(currency)
-                .build();
+        Money newCostPrice = Money.of(costPriceAmount, currency);
 
         product.setCostPrice(newCostPrice);
 
@@ -61,10 +57,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductResponse toProductResponse(Product product) {
-        BigDecimal costAmount = product.getCostPrice() != null ? product.getCostPrice().getAmount() : null;
+        BigDecimal costAmount = product.getCostPrice() != null ? product.getCostPrice().toDecimal() : null;
         String costCurrency = product.getCostPrice() != null ? product.getCostPrice().getCurrency() : null;
 
-        return new ProductResponse(
+        return new ProductResponse (
                 product.getId(),
                 product.getSku(),
                 product.getName(),
@@ -74,4 +70,3 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 }
-

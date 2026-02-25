@@ -104,7 +104,30 @@ Rules to follow:
     2. If its ENUM - @Enumerated, if its jsonb - @JdbcTypeCode(SqlTypes.JSON) and by that i mean to use specifications for specific data types.
 9) Repositories:
     1. Use JOIN FETCH if entitie's relations are 101% needed to execute logic, instead of leaving them as proxy.
-10) Каждый тип данных который считает деньги должен проходить через Money тип если он внедряется в DataLayer ???
+10) Money / BigDecimal / Long — типы для денег: (С уточнениями от ИИ -шки)
+    1. DB column / JPA field — Long (minor units). Integer arithmetic, нет float ошибок, стандарт финансовых систем.
+    2. Domain value object — Money. Инкапсулирует Long + currency, знает как себя конвертировать. Живёт в Entity (@Embedded) и в domain-level расчётах, где важна валюта.
+    3. API Request / Response — BigDecimal. Человекочитаемо: 10.50, а не 1050.
+    4. Вычисления внутри сервиса — Money или BigDecimal. Никогда double / float.
+
+    Границы:
+        Controller (Request DTO: BigDecimal)
+            ↓ Money.of(bigDecimal, currency)
+        Service / Entity (Money — сумма + валюта, защита от смешивания валют)
+            ↓ JPA
+        DB column (Long — minor units: 1050 = 10.50 KZT)
+            ↑ .toDecimal()
+        Service → Response DTO (BigDecimal — человекочитаемо)
+
+    Правило: Long — это внутренний формат хранения. toDecimal() — граница между DataLayer и API. of(BigDecimal) — граница между API и DataLayer.
+    Смысл Money не в арифметике, а в том, что сумма никогда не существует без валюты — это защита от класса багов на уровне типов:
+
+    // Без Money — никто не мешает сложить KZT + USD
+    BigDecimal total = costKZT.add(costUSD); // тихий баг, компилятор не поймает
+
+    // С Money — ошибка гарантирована на уровне домена
+    Money total = costKZT.add(costUSD); // бросит CURRENCY_MISMATCH
+
 Prohibited:
 1) Генерировать миграции БД без вашего явного ревью
 2) Использование var. Использовать только строгие типы данных, так как это ядро приложения - оно должно быть строго типизированым и понятным для будущим разработчиков и интеграций
