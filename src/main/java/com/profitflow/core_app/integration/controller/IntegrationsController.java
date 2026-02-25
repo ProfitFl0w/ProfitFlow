@@ -1,18 +1,15 @@
-package com.profitflow.core_app.controller;
+package com.profitflow.core_app.integration.controller;
 
+import com.profitflow.core_app.integration.dto.CreateIntegrationRequest;
+import com.profitflow.core_app.integration.dto.IntegrationStub;
+import com.profitflow.core_app.integration.dto.SyncStartResponse;
+import com.profitflow.core_app.integration.dto.UploadAcceptedResponse;
 import com.profitflow.core_app.integration.entity.Platform;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.OffsetDateTime;
@@ -76,37 +73,5 @@ public class IntegrationsController {
                 file.getSize(),
                 "accepted"
         ));
-    }
-
-    public record CreateIntegrationRequest(
-            Platform platform,
-            @NotBlank String name,
-            String apiKeyMaskedHint
-    ) {
-    }
-
-    public record IntegrationStub(
-            UUID id,
-            Platform platform,
-            String name,
-            boolean active,
-            OffsetDateTime lastSyncedAt
-    ) {
-    }
-
-    public record SyncStartResponse(
-            UUID jobId,
-            UUID integrationId,
-            String status,
-            String message
-    ) {
-    }
-
-    public record UploadAcceptedResponse(
-            UUID integrationId,
-            String fileName,
-            long fileSize,
-            String status
-    ) {
     }
 }

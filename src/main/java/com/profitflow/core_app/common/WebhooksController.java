@@ -1,4 +1,4 @@
-package com.profitflow.core_app.controller;
+package com.profitflow.core_app.common;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

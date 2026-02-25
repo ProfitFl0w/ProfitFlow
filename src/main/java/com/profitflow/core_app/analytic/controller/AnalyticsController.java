@@ -1,4 +1,4 @@
-package com.profitflow.core_app.controller;
+package com.profitflow.core_app.analytic.controller;
 
 import com.profitflow.core_app.analytic.dto.DashboardResponse;
 import com.profitflow.core_app.analytic.dto.OrdersAnalyticsResponse;
