@@ -1,0 +1,96 @@
+Context:
+E-Commerce Analytics MVP
+КОНТЕКСТ ПРОЕКТА
+AstanaHub · v1.1 · 2026
+
+1. Суть продукта (Business Scope)
+
+Параметр	Описание
+Что делаем	Платформа сквозной финансовой аналитики для e-commerce селлеров (Kaspi, Ozon, WB, и паназиатские маркетплейсы: Индия, Индонезия, Малайзия, Таиланд, Сингапур, Япония и др.).
+Главная ценность	Показать директору/владельцу реальную чистую прибыль, маржинальность и все скрытые расходы в понятном дашборде. С аудит-трейлом: формула прибыли видна ('1000 цена - 200 комиссия - 300 логистика = 500').
+Стратегия	Старт в КЗ через Astana Hub. Затем — выход на мировой рынок через азиатские маркетплейсы. Диверсификация платформ — главная защита от зависимости от одного API.
+Out of Scope	Складской учёт. Продукт строго для FBM-селлеров (Fulfilled by Marketplace). Не делаем: склад, CRM, ML-прогнозирование.
+Целевой пользователь	Владелец или директор магазина на маркетплейсе. Нужна одна цифра: сколько реально заработал, с разбивкой по платформам и товарам.
+
+2. Технологический стек (Tech Stack)
+
+Компонент	Детали
+Backend	Java 21 + Spring Boot 3 (монолит). Vertical Slices архитектура.
+Database	PostgreSQL, хостинг: Neon (serverless). Подключение через HikariCP (maxPoolSize=5-10). На продакшене рекомендован порт 6543 (PgBouncer).
+Frontend	Next.js (App Router) + React Query + Tailwind CSS + shadcn/ui + Tremor (графики). React Query вместо SWR — лучший контроль polling и mutations.
+Hosting Frontend	Vercel — нативно для Next.js.
+Hosting Backend	Railway (primary для MVP) + Fly.io (тест с 3-й недели, нужен для азиатских регионов). Минимум 2GB RAM на инстансе — Java требовательна.
+CDN / Security	Cloudflare — DNS, SSL, WAF, DDoS-защита. Обязательно.
+API контракт	REST API, документация через Swagger/OpenAPI (springdoc-openapi). TypeScript-клиент генерируется из Swagger через openapi-generator — fetch руками не пишем.
+Auth	JWT (access + refresh token). Spring Security — только ручной код, никаких AI-генераций.
+
+3. Архитектура и ключевые процессы
+
+Адаптерный слой (Data Aggregator)
+Каждый маркетплейс изолирован в отдельном пакете (integration/kaspi/, integration/ozon/, integration/wb/). JSON от API маркетплейсов парсится через адаптер и приводится к единому нормализованному формату (DataLayer) перед сохранением в БД. Бизнес-логика не знает о 'Kaspi JSON' — только о нормализованной модели.
+
+Оригинальный JSON сохраняется
+Колонка raw_data (jsonb) хранит оригинальный ответ маркетплейса. Если логика расчёта изменится задним числом — можно пересчитать без повторного вызова API.
+
+Стратегия синхронизации (гибрид)
+•	1.: Webhooks (приоритет) — Ozon поддерживает push-уведомления. Kaspi: наличие webhooks не подтверждено — polling обязателен как основа.
+•	2.: Lightweight polling каждые 15 минут — только новые/изменённые заказы за последние 24 часа. Для WB (нет webhooks) и как fallback для остальных.
+•	3.: Full reconciliation раз в сутки — полная сверка за 30 дней для исправления ретроактивных изменений комиссий. Кнопка 'Обновить' запускает этот режим.
+
+Асинхронность
+Любая синхронизация: создаётся запись в sync_jobs (id, status: IN_PROGRESS/SUCCESS/ERROR) → возвращается job_id → фоновый поток (@Async) обрабатывает → фронт опрашивает статус каждые 3 секунды. Retry: exponential backoff + jitter + circuit breaker. Никаких долгих HTTP-запросов в основном потоке.
+
+CSV Fallback
+Если API маркетплейса недоступен — селлер может загрузить отчёт вручную (CSV/Excel). Система парсит. Бизнес не умирает при потере одного API.
+
+4. Схема базы данных (Core DataLayer)
+
+Единый стандартизированный слой данных. Все поля типа деньги — BigDecimal. Все даты — UTC (конвертация только на фронте).
+
+Таблица	Поля и правила
+merchants	id, company_name, email
+integrations	id, merchant_id, platform (KASPI/OZON/WB), api_key (ЗАШИФРОВАН — Jasypt/Vault), shop_name, currency, exchange_rate
+products	id, merchant_id, sku, name, cost_price (себестоимость, ввод вручную)
+orders	id, integration_id, external_id, order_date (UTC), status, raw_data (jsonb). UNIQUE (integration_id, external_id) — обязательно.
+order_items	id, order_id, product_id, quantity, selling_price, platform_fee, logistics_fee, other_fees, payout_amount. Immutable — не перезаписывается.
+order_item_adjustments	id, order_item_id, type (COMMISSION_CHANGE / PENALTY / STORAGE_FEE / LOGISTICS_ADJ / REFUND_ADJ), amount (BigDecimal), reason, created_at (UTC). Append-only — только добавление. Для ретроактивных изменений.
+sync_jobs	id, integration_id, status, started_at, finished_at, error_message
+
+Формула чистой прибыли: SUM(payout_amount) + SUM(adjustments.amount) − SUM(cost_price × quantity).
+
+✅	Индексы — обязательно до продакшена
+order_date (orders), integration_id (orders, order_items), product_id (order_items), merchant_id (orders). Без индексов аналитика тормозит с первой сотней селлеров.
+
+5. Правила разработки команды
+
+Правило	Детали
+Команда	3 Middle Java Backend Developers. Каждый делает фичу целиком: от БД до фронта (Vertical Slices).
+Git flow	Trunk-Based Development. Короткие feature-ветки. CR минимум от 1 человека. Security и миграции — CR от 2 человек.
+API-First	Любые изменения контракта — сначала в Swagger, потом код. Никогда наоборот.
+Миграции	Только вручную. Cursor может предложить — человек создаёт, после обсуждения. Всегда проходит CR.
+Фича = Vertical Slice	Entity + Repository + Service + Controller + Swagger + Front integration. Один разработчик — один слайс.
+MVP scope	Чистая прибыль, маржинальность, дашборд, корректная синхронизация. Не делаем: склад, CRM, ML.
+Монолит до...	>100 активных селлеров или >1M order_items. До этого — никакого premature microservices.
+
+6. Риски и митигация
+
+Вероятность	Риск и митигация
+Высокий	API меняет структуру без предупреждения — происходит постоянно. Решение: адаптерный DataLayer + raw_data jsonb + мониторинг ошибок парсинга.
+Средний	WB ToS ограничивает передачу personal access tokens. Проверить до подключения — возможно нужен партнёрский статус.
+Средний	Rate limiting или изменение ToS против third-party аналитики. Митигация: диверсификация платформ с первого дня + CSV fallback.
+Низкий	Целенаправленная блокировка по IP. Решение: официальный партнёрский статус, соблюдение rate limits. Proxy rotation — запрещено, нарушает ToS.
+Юридика	Проконсультироваться с IT-юристом (КЗ) до публичного запуска. Проверить ToS каждого маркетплейса на third-party analytics и token sharing.
+
+E-Commerce Analytics MVP · Context v1.1 · AstanaHub 2026
+
+
+Rules to follow:
+1) API-First подход
+2) Service inteface First, Service Impl after
+3) Мягкое удаление — deleted_at, is_deleted
+4) strategy = GenerationType.UUID
+
+Prohibited:
+1) Генерировать миграции БД без вашего явного ревью
+2) использование var. Использовать только строгие типы данных, так как это ядро приложения - оно должно быть строго типизированым и понятным для будущим разработчиков и интеграций
+var можно в тестах и в очень локальных утилитных методах. В production ядре — явные типы
