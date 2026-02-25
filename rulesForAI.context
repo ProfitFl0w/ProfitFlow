@@ -89,8 +89,24 @@ Rules to follow:
 2) Service inteface First, Service Impl after
 3) Мягкое удаление — deleted_at, is_deleted
 4) strategy = GenerationType.UUID
-
+5) Services:
+    1. Services need to communicate between each other using only Unique dto -s (see in DTO -s section bvelow to know what do I mean by that)
+    2. Services MUSTN'T use other service's repositories. For example OrderService cannot use MerchantRepository, it uses only OrderRepository, thus leading to the need of getting other repositories entity info as dto's as I described before.
+    3. Services by default need to be @Transactional(readOnly = true), only those which change DB's state (PUT, POST, DELETE) must be @Transactional
+    4. ALways look out for internal transactional calls within same method because they can break logic and inner call will be non-transactional.
+    5. Methods are great structured if they are ONLY calling other methods. One ,ethod cannot have pure logic in itself. It only must call other methods and just control what data it passes.
+6) Dto -s:
+    1. We have only 3 types of DTO: Unique (that copies the entity with all its inherited), Request, Response. Unique is only used in backend logic, request/response are the ones being shown to the frontend, unique dto -s are never transferred to frontend.
+7) Controllers:
+    1. Controllers return only ResponseEntity with .status(200, 201 and etc.) and .body(Some Response Dto). BUT NOTHING ELSE. Not even try/catch, no logic besides just calling service's ONE SPECIFIC method and returning the value of it.
+8) Entities:
+    1. Every relation must be LAZY by default. 
+    2. If its ENUM - @Enumerated, if its jsonb - @JdbcTypeCode(SqlTypes.JSON) and by that i mean to use specifications for specific data types.
+9) Repositories:
+    1. Use JOIN FETCH if entitie's relations are 101% needed to execute logic, instead of leaving them as proxy.
+10) Каждый тип данных который считает деньги должен проходить через Money тип если он внедряется в DataLayer ???
 Prohibited:
 1) Генерировать миграции БД без вашего явного ревью
-2) использование var. Использовать только строгие типы данных, так как это ядро приложения - оно должно быть строго типизированым и понятным для будущим разработчиков и интеграций
+2) Использование var. Использовать только строгие типы данных, так как это ядро приложения - оно должно быть строго типизированым и понятным для будущим разработчиков и интеграций
 var можно в тестах и в очень локальных утилитных методах. В production ядре — явные типы
+3) Making methods longer than 30 lines. 

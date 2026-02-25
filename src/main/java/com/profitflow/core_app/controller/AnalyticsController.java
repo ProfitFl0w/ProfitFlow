@@ -1,9 +1,9 @@
 package com.profitflow.core_app.controller;
 
-import com.profitflow.core_app.dto.analytics.DashboardResponse;
-import com.profitflow.core_app.dto.analytics.OrdersAnalyticsResponse;
-import com.profitflow.core_app.dto.analytics.ProfitByProductResponse;
-import com.profitflow.core_app.service.AnalyticsService;
+import com.profitflow.core_app.analytic.dto.DashboardResponse;
+import com.profitflow.core_app.analytic.dto.OrdersAnalyticsResponse;
+import com.profitflow.core_app.analytic.dto.ProfitByProductResponse;
+import com.profitflow.core_app.analytic.service.AnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.profitflow.core_app.controller;
 
-import com.profitflow.core_app.entity.integration.Platform;
+import com.profitflow.core_app.integration.entity.Platform;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
